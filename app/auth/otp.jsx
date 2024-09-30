@@ -23,7 +23,7 @@ const OtpScreen = () => {
   //backend
   const sendDataToBackend = async () => {
     try {
-      const response = await axios.post('http://192.168.214.3:5000/send-otp', {
+      const response = await axios.post('http://192.168.31.232:5000/send-otp', {
         mail: mail,
       });
       console.log('Response from backend:', response.data);
@@ -48,7 +48,7 @@ const OtpScreen = () => {
     if (Otp == backendOtp) {
       await AsyncStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
-      router.replace('screens/home');
+      router.replace('/chats');
     }
     else {
       Alert.alert("Invalid OTP");

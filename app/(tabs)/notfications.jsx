@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const Notification = () => {
+const Notfications = () => {
   return (
     <View>
-      <Text>Notification</Text>
+      <Text>Notfications</Text>
     </View>
   )
 }
 
-export default Notification
+export default Notfications

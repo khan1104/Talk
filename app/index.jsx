@@ -9,7 +9,7 @@ const App = () => {
       const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
       console.log(isLoggedIn);
       if (isLoggedIn) {
-        router.replace('screens/home'); // Replace to prevent going back
+        router.replace('chats'); // Replace to prevent going back
       }
     };
     checkLoggedInStatus();

@@ -6,13 +6,15 @@ import { useNavigation,useRouter} from 'expo-router';
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addDoc, collection } from 'firebase/firestore';
+import {app,db} from "../config"
 
 const OtpScreen = () => {
   const router = useRouter();
   const [isLoggedIn,setIsLoggedIn]=useState(false);
   const navigation = useNavigation();
   const route = useRoute();
-  const { mail} = route.params
+  const {user,mail,password} = route.params
   const [count, setCount] = useState(60);
   const [Otp, setOtp] = useState('');
   const [backendOtp, setBackendOtp] = useState("");
@@ -23,7 +25,7 @@ const OtpScreen = () => {
   //backend
   const sendDataToBackend = async () => {
     try {
-      const response = await axios.post('http://192.168.31.232:5000/send-otp', {
+      const response = await axios.post('http://192.168.61.3:5000/send-otp', {
         mail: mail,
       });
       console.log('Response from backend:', response.data);
@@ -48,7 +50,18 @@ const OtpScreen = () => {
     if (Otp == backendOtp) {
       await AsyncStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
-      router.replace('/chats');
+      // router.replace('/chats');
+      try {
+        await addDoc(collection(db, 'users'), {
+            user,
+            mail,
+            password,
+        });
+        Alert.alert("successfully register");
+        router.replace("/chats")
+    } catch (error) {
+        setMessage('Error: ' + error.message);
+    }
     }
     else {
       Alert.alert("Invalid OTP");
@@ -103,6 +116,7 @@ const OtpScreen = () => {
           textAlign: "center"
         }}>Verify</Text>
       </Pressable>
+      <Text>{user} and {mail} and {password}</Text>
     </SafeAreaView>
   );
 }

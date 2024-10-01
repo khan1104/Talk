@@ -40,7 +40,7 @@ const singup = () => {
       // Proceed with signup
       setverifysingup(true);
       console.log("Signup successful");
-      navigation.navigate('auth/otp',{mail:mail});
+      navigation.navigate('auth/otp',{user:user,mail:mail,password:password});
     }
     else {
       console.log("unsuccessful login")

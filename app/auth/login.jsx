@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Dimensions, Image, TextInput, Pressable, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, Dimensions, Image, TextInput, Pressable, StyleSheet, ScrollView, Alert,ActivityIndicator } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -18,6 +18,7 @@ const login = () => {
   const [mail, setMail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setshowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
   const toggleShowPassword = () => {
     setshowPassword(!showPassword);
   };
@@ -30,6 +31,7 @@ const login = () => {
     }
     else {
       // console.log("welocm buddy");
+      setLoading(true);
       try {
         const querySnapshot = await getDocs(collection(db, 'users'));
         let found = false;
@@ -40,6 +42,7 @@ const login = () => {
             found = true;
             AsyncStorage.setItem('isLoggedIn', 'true');
             setIsLoggedIn(true);
+            AsyncStorage.setItem('userEmail', mail);
             router.replace("/chats");
           }
         });
@@ -49,6 +52,9 @@ const login = () => {
         }
       } catch (error) {
         setMessage('Error: ' + error.message);
+      }
+      finally {
+        setLoading(false); // Stop loading
       }
     }
   };
@@ -110,12 +116,16 @@ const login = () => {
             }}>Forgot Password</Text>
           </Pressable>
           <Pressable style={style.loginbtn} onPress={loginNext}>
+          {loading ? (
+          <ActivityIndicator size="large" color="#ffffff" />
+        ) : (
             <Text style={{
               fontSize: 20,
               fontWeight: "bold",
               color: "white",
               letterSpacing: 1
             }}>Login</Text>
+          )}
           </Pressable>
           <Pressable style={style.loginbtn} onPress={next}>
             <Text style={{

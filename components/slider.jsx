@@ -61,7 +61,7 @@ const Slider = () => {
       <View style={{
         flexDirection: "row",
         justifyContent: "center",
-        marginBottom: 50,
+        marginBottom:50,
       }}>
         {
           DATA.map((_, index) => (
@@ -99,14 +99,16 @@ const Slider = () => {
 
 const styles = StyleSheet.create({
   container: {
-    width: width,
+    // width: width,
     flex: 1,
     backgroundColor: "#e6f7fa",
   },
   image: {
     marginTop: 40,
-    width: width,
-    height: 550,
+    // width: width,
+    // height: 550,
+    width:width,
+    height:530
   },
   indicator: {
     height: 4,

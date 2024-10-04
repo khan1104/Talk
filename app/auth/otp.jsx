@@ -1,23 +1,26 @@
-import { View, Text, StyleSheet, Pressable, SafeAreaView, Alert } from 'react-native'
+import { View, Text, StyleSheet, Pressable, SafeAreaView, Alert, Image,ActivityIndicator } from 'react-native'
 import { CommonActions } from '@react-navigation/native';
 import OtpTextInput from "react-native-otp-textinput"
 import React, { useEffect, useState } from 'react'
-import { useNavigation,useRouter} from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addDoc, collection } from 'firebase/firestore';
-import {app,db} from "../config"
+import { addDoc, collection, setDoc,doc } from 'firebase/firestore';
+import { app, db, storage } from "../config"
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 const OtpScreen = () => {
+  const defaultImageUri = Image.resolveAssetSource(require('../../assets/images/user.png')).uri;
   const router = useRouter();
-  const [isLoggedIn,setIsLoggedIn]=useState(false);
-  const navigation = useNavigation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const route = useRoute();
-  const {user,mail,password} = route.params
+  const { user, mail, password } = route.params
   const [count, setCount] = useState(60);
   const [Otp, setOtp] = useState('');
   const [backendOtp, setBackendOtp] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state
   useEffect(() => {
     const timer = count > 0 && setInterval(() => setCount(count - 1), 1000);
     return () => clearInterval(timer);
@@ -25,7 +28,7 @@ const OtpScreen = () => {
   //backend
   const sendDataToBackend = async () => {
     try {
-      const response = await axios.post('http://192.168.61.3:5000/send-otp', {
+      const response = await axios.post('http://192.168.31.232:5000/send-otp', {
         mail: mail,
       });
       console.log('Response from backend:', response.data);
@@ -35,6 +38,8 @@ const OtpScreen = () => {
       Alert.alert("Server Error");
     }
   };
+  //new
+  //yaha tak
   const getOtp = () => {
     if (count == 0) {
       console.log("otp sent");
@@ -48,20 +53,37 @@ const OtpScreen = () => {
   };
   const verifyOtp = async () => {
     if (Otp == backendOtp) {
+      setLoading(true);
       await AsyncStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
-      // router.replace('/chats');
+      const response = await fetch(defaultImageUri);
+      const blob = await response.blob();
+      const filename = mail; // Use email or any unique identifier as the filename
+
+      const storageRef = ref(storage, `profile_images/${filename}-profile.png`);
+
       try {
-        await addDoc(collection(db, 'users'), {
-            user,
-            mail,
-            password,
+        await uploadBytes(storageRef, blob);
+        const imageUrl = await getDownloadURL(storageRef);
+
+        // Store user data in Firestore
+        await setDoc(doc(db, 'users', mail), {
+          user,
+          mail,
+          password,
+          profileImage: imageUrl,
         });
         Alert.alert("successfully register");
-        router.replace("/chats")
-    } catch (error) {
-        setMessage('Error: ' + error.message);
-    }
+        router.navigate("auth/login");
+        // router.replace("/chats")
+
+      } catch (error) {
+        Alert.alert("error:" + error.message);
+        console.log(error.message);
+      }
+      finally {
+        setLoading(false); // Stop loading
+      }
     }
     else {
       Alert.alert("Invalid OTP");
@@ -109,12 +131,16 @@ const OtpScreen = () => {
         onPress={verifyOtp}
         disabled={Otp.length != 6 ? true : false}
       >
-        <Text style={{
-          color: "white",
-          fontSize: 20,
-          fontWeight: "bold",
-          textAlign: "center"
-        }}>Verify</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#ffffff" />
+        ) : (
+          <Text style={{
+            color: "white",
+            fontSize: 20,
+            fontWeight: "bold",
+            textAlign: "center"
+          }}>Verify</Text>
+        )}
       </Pressable>
       <Text>{user} and {mail} and {password}</Text>
     </SafeAreaView>

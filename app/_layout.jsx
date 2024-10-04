@@ -1,12 +1,13 @@
 
 import { Stack, useNavigation} from "expo-router";
 import React, { useEffect, useState } from 'react';
-
+import  Header  from "../components/header"
+import { View, Text, Image, SafeAreaView } from 'react-native'
 
 export default function RootLayout() {
   const navigation=useNavigation();
   /*React.useEffect(()=>{
-    navigation.navigate("/chats");
+    navigation.navigate("auth/userprofile");
   },[]);*/
   return (
     <Stack>
@@ -23,15 +24,12 @@ export default function RootLayout() {
         headerShown:false,
       }}/>
       <Stack.Screen name="(tabs)" options={{
-        title:"TALK",
-        headerTitleStyle:{
-          color:"white",
-          fontWeight:"bold"
-        },
-        headerStyle:{
-          backgroundColor:"#2f3030",
-        }
+        header:()=> <Header/>
       }}/>
+      <Stack.Screen name="screens/profile" options={{
+        headerShown:false
+      }}/>
+      <Stack.Screen name="screens/settings" />
     </Stack>
   );
 }

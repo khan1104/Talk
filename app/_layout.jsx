@@ -27,9 +27,14 @@ export default function RootLayout() {
         header:()=> <Header/>
       }}/>
       <Stack.Screen name="screens/profile" options={{
-        headerShown:false
+        headerTitle:"Profile",
+        headerTitleStyle:{
+          fontSize:30
+        },
+        headerStyle:{
+          backgroundColor:"#f0f8ff"
+        }
       }}/>
-      <Stack.Screen name="screens/settings" />
     </Stack>
   );
 }

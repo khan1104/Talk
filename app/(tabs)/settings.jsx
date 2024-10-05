@@ -1,0 +1,167 @@
+import { View, Text, StyleSheet, Pressable, Image, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Fontisto from '@expo/vector-icons/Fontisto';
+
+
+const Settings = () => {
+  const router = useRouter();
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+  useEffect(() => {
+    const loadLanguage = async () => {
+      const lang = await AsyncStorage.getItem('appLanguage');
+      if (lang) {
+        setSelectedLanguage(lang);
+      }
+    };
+    loadLanguage();
+  }, []);
+
+  const handleLanguageChange = async (lang) => {
+    setSelectedLanguage(lang);
+    await AsyncStorage.setItem('appLanguage', lang);
+  };
+
+  const handleFeedback = () => {
+    Alert.alert("Feedback", "Thank you for your feedback!");
+  };
+
+  const handleAccountSettings = () => {
+    router.navigate("screens/profile");
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      "Loggin Out",
+      "Logging out would not delete TALK account",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "LogOut", onPress: async () => {
+            await AsyncStorage.clear(); // Clear all AsyncStorage data
+            router.replace("auth/login");
+          }
+        },
+      ]
+    );
+
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete", onPress: async () => {
+            // Implement account deletion logic here
+            await AsyncStorage.clear(); // Clear user data
+            router.replace("auth/login"); // Redirect to login screen
+            //aur lik na hai
+          }
+        },
+      ]
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <View>
+        <Text style={{
+          color: "black",
+          fontSize: 30,
+          fontWeight: "bold",
+          textAlign: "center",
+        }}>Settings</Text>
+      </View>
+
+      {/* Language Selection */}
+      <View style={styles.settingItem}>
+        <View style={{
+          flexDirection:"row",
+        }}>
+          <Fontisto name="world-o" size={26} color="black" />
+          <Text style={styles.settingText}>App Language</Text>
+        </View>
+        <Picker
+          selectedValue={selectedLanguage}
+          style={styles.picker}
+          onValueChange={handleLanguageChange}
+        >
+          <Picker.Item label="English" value="en" />
+          <Picker.Item label="Spanish" value="es" />
+          <Picker.Item label="French" value="fr" />
+        </Picker>
+      </View>
+
+      {/* Account Settings */}
+      <Pressable style={[styles.settingItem,styles.extra]} onPress={handleAccountSettings}>
+      <MaterialIcons name="app-settings-alt" size={28} color="black" />
+        <Text style={styles.settingText}>Account Settings</Text>
+      </Pressable>
+
+      {/* Feedback */}
+      <Pressable style={[styles.settingItem,styles.extra]} onPress={handleFeedback}>
+      <MaterialIcons name="feedback" size={27} color="black" />
+        <Text style={styles.settingText}>Send Feedback</Text>
+      </Pressable>
+
+      {/* Logout */}
+      <Pressable style={[styles.settingItem, styles.extra]} onPress={handleLogout}>
+        <MaterialIcons name="logout" size={27} color="black" />
+        <Text style={styles.settingText}>Logout</Text>
+      </Pressable>
+
+      {/* Delete Account */}
+      <Pressable style={[styles.settingItem, styles.extra]} onPress={handleDeleteAccount}>
+        <MaterialIcons name="delete" size={27} color="red" />
+        <Text style={[styles.settingText, styles.deleteText]}>Delete Account</Text>
+      </Pressable>
+
+      {/* App Version */}
+      <Text style={styles.versionText}>Version 1.0.0</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f0f8ff',
+  },
+  settingItem: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    marginTop: 20
+  },
+  extra: {
+    flexDirection: "row"
+  },
+  settingText: {
+    fontSize: 22,
+    marginHorizontal: 5
+  },
+  deleteText: {
+    color: 'red',
+    fontWeight: 'bold',
+  },
+  picker: {
+    height: 50,
+    width: 150,
+  },
+  versionText: {
+    textAlign: 'center',
+    marginTop: 30,
+    fontSize: 16,
+    color: '#666',
+  },
+});
+
+export default Settings;

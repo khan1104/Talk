@@ -69,7 +69,7 @@ const singup = () => {
             textAlign: "center",
             fontWeight: "bold",
             color: "black"
-          }}>Sing Up!!!</Text>
+          }}>Sign Up!!!</Text>
           <View style={style.phone}>
             <FontAwesome name="user" size={30} color="black" style={style.icon} />
             <TextInput placeholder='set your user name' style={style.text}

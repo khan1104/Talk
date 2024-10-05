@@ -21,6 +21,7 @@ const OtpScreen = () => {
   const [Otp, setOtp] = useState('');
   const [backendOtp, setBackendOtp] = useState("");
   const [loading, setLoading] = useState(false); // Loading state
+  const bio="Hey there i am using TALK"
   useEffect(() => {
     const timer = count > 0 && setInterval(() => setCount(count - 1), 1000);
     return () => clearInterval(timer);
@@ -72,6 +73,7 @@ const OtpScreen = () => {
           mail,
           password,
           profileImage: imageUrl,
+          bio,
         });
         Alert.alert("successfully register");
         router.navigate("auth/login");

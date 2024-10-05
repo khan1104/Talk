@@ -26,13 +26,12 @@ const Tablayout = () => {
           title:"Notifications",
           tabBarIcon:({color}) => <MaterialIcons name="notifications" size={30} color={color} />
         }}/>
-        <Tabs.Screen name="addfriends" options={{
+        <Tabs.Screen name="settings" options={{
           headerShown:false,
-          title:"Add Friends",
-          tabBarIcon:({color}) => <Ionicons name="person-add-sharp" size={30} color={color} />
+          title:"settings",
+          tabBarIcon:({color}) => <Ionicons name="settings" size={30} color={color} />
         }}/>
     </Tabs>
   )
 }
-
 export default Tablayout

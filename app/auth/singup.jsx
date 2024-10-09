@@ -7,6 +7,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Entypo from '@expo/vector-icons/Entypo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../config'; // Adjust this path to your Firebase configuration
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 
 const singup = () => {
@@ -31,23 +33,34 @@ const singup = () => {
   const validatePassword = (password) => {
     return regex.test(password);
   };
-  const singupNext =async (token) => {
+  const singupNext = async () => {
     setuserverify(user.length > 0);
     setmailverify(validateemail(mail));
     setpasswordverify(validatePassword(password));
-
+  
     if (user.length > 0 && validateemail(mail) && validatePassword(password)) {
-      // Proceed with signup
-      setverifysingup(true);
-      console.log("Signup successful");
-      navigation.navigate('auth/otp',{user:user,mail:mail,password:password});
+      try{
+        const q = query(collection(db, 'users'), where('mail', '==', mail));
+        const querySnapshot = await getDocs(q);
+        if(querySnapshot.empty){
+          setverifysingup(true);
+          console.log("Signup successful");
+          navigation.navigate('auth/otp', { user: user, mail: mail, password: password });
+        }
+        else{
+          Alert.alert("Email Alredy Exists","this Email is alredy in use");
+        }
+      }catch(error){
+        console.log("error"+error);
+      }
     }
     else {
-      console.log("unsuccessful login")
+      console.log("unsuccessful signup");
       setverifysingup(false);
-      Alert.alert("Incomplete Data", "Enter proper detials");
+      Alert.alert("Incomplete Data", "Enter proper details");
     }
   };
+  
   const login = () => {
     navigation.navigate('auth/login');
   };

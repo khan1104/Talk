@@ -11,7 +11,7 @@ const Header = () => {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const profileNext=()=>{
+  const profileNext = () => {
     router.push("screens/profile");
   }
   const fetchData = async () => {
@@ -45,32 +45,32 @@ const Header = () => {
 
 
   return (
-      <View style={{ backgroundColor: "#2f3030", height: 100, justifyContent: "flex-end" }}>
-        <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "white", fontWeight: "bold", fontSize: 30, marginLeft: 15,  }}>TALK</Text>
+    <View style={{ backgroundColor: "#2f3030", height: 100, justifyContent: "flex-end"}}>
+      <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+        <Text style={{ color: "white", fontWeight: "bold", fontSize: 30, marginLeft: 15, }}>TALK</Text>
 
-          <Pressable onPress={profileNext}>
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" style={{ marginRight: 16, marginBottom: 10 }} />
-            ) : (
-              <Image
-                source={userDetails?.profileImage
-                  ? { uri: userDetails.profileImage }
-                  : require("../assets/images/icon.png")}
-                style={{
-                  width: 45,
-                  height: 45,
-                  borderWidth: 1.5,
-                  borderColor: "white",
-                  borderRadius: 50,
-                  marginBottom: 10,
-                  marginRight: 16,
-                }}
-              />
-            )}
-          </Pressable>
-        </View>
+        <Pressable onPress={profileNext}>
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" style={{ marginRight: 16, marginBottom: 10 }} />
+          ) : (
+            <Image
+              source={userDetails?.profileImage
+                ? { uri: userDetails.profileImage }
+                : require("../assets/images/icon.png")}
+              style={{
+                width: 45,
+                height: 45,
+                borderWidth: 1.5,
+                borderColor: "white",
+                borderRadius: 50,
+                marginBottom: 10,
+                marginRight: 16,
+              }}
+            />
+          )}
+        </Pressable>
       </View>
+    </View>
 
   );
 };

@@ -5,6 +5,8 @@ import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Fontisto from '@expo/vector-icons/Fontisto';
+import { db } from '../config'; // Adjust the import path as necessary
+import { doc, deleteDoc } from 'firebase/firestore';
 
 
 const Settings = () => {
@@ -59,10 +61,17 @@ const Settings = () => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete", onPress: async () => {
-            // Implement account deletion logic here
-            await AsyncStorage.clear(); // Clear user data
-            router.replace("auth/login"); // Redirect to login screen
-            //aur lik na hai
+              try {
+                const email=await AsyncStorage.getItem("userEmail");
+                console.log(email)
+                await deleteDoc(doc(db, 'users',email));
+                Alert.alert('Success', 'Account deleted Successfully');
+                await AsyncStorage.clear(); // Clear user data
+                router.replace("auth/login");
+              } catch (error) {
+                console.error('Error deleting document: ', error);
+                Alert.alert('Error', 'Failed to delete document.');
+            }
           }
         },
       ]
@@ -133,7 +142,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#e6f7fa',
   },
   settingItem: {
     paddingVertical: 15,

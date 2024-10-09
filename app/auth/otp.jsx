@@ -39,8 +39,6 @@ const OtpScreen = () => {
       Alert.alert("Server Error");
     }
   };
-  //new
-  //yaha tak
   const getOtp = () => {
     if (count == 0) {
       console.log("otp sent");
@@ -77,7 +75,6 @@ const OtpScreen = () => {
         });
         Alert.alert("successfully register");
         router.navigate("auth/login");
-        // router.replace("/chats")
 
       } catch (error) {
         Alert.alert("error:" + error.message);
@@ -144,7 +141,6 @@ const OtpScreen = () => {
           }}>Verify</Text>
         )}
       </Pressable>
-      <Text>{user} and {mail} and {password}</Text>
     </SafeAreaView>
   );
 }

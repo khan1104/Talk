@@ -3,6 +3,7 @@ import { Stack, useNavigation} from "expo-router";
 import React, { useEffect, useState } from 'react';
 import  Header  from "../components/header"
 import { View, Text, Image, SafeAreaView } from 'react-native'
+import { ChatProvider } from './ChatContext';
 
 export default function RootLayout() {
   const navigation=useNavigation();
@@ -10,6 +11,7 @@ export default function RootLayout() {
     navigation.navigate("auth/userprofile");
   },[]);*/
   return (
+    <ChatProvider>
     <Stack>
       <Stack.Screen name="index" options={{
           headerShown:false,
@@ -32,9 +34,10 @@ export default function RootLayout() {
           fontSize:30
         },
         headerStyle:{
-          backgroundColor:"#f0f8ff"
+          backgroundColor:"#e6f7fa"
         }
       }}/>
     </Stack>
+    </ChatProvider>
   );
 }

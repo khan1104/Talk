@@ -146,7 +146,7 @@ const Profile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#e6f7fa',
     alignItems: 'center',
     padding: 20,
   },

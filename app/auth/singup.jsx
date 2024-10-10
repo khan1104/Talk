@@ -89,7 +89,7 @@ const singup = () => {
               autoCapitalize='none'
               autoComplete='false'
               onChangeText={setuser}
-              maxLength={25}
+              maxLength={10}
             />
           </View>
           <View style={style.phone}>

@@ -6,18 +6,27 @@ import { useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { db } from '../config'; // Adjust the import path as necessary
-import { doc, deleteDoc } from 'firebase/firestore';
+import { doc, deleteDoc,getDoc,setDoc } from 'firebase/firestore';
 
 
 const Settings = () => {
   const router = useRouter();
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState('');
 
   useEffect(() => {
     const loadLanguage = async () => {
-      const lang = await AsyncStorage.getItem('appLanguage');
-      if (lang) {
-        setSelectedLanguage(lang);
+      const userEmail = await AsyncStorage.getItem('userEmail'); // Assuming you have userEmail stored
+      if (userEmail) {
+        const docRef = doc(db, 'users', userEmail);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setSelectedLanguage(docSnap.data().language);
+          console.log("languae");
+          console.log(selectedLanguage)
+        }
+        else{
+          console.log("not found");
+        }
       }
     };
     loadLanguage();
@@ -25,7 +34,17 @@ const Settings = () => {
 
   const handleLanguageChange = async (lang) => {
     setSelectedLanguage(lang);
-    await AsyncStorage.setItem('appLanguage', lang);
+    const userEmail = await AsyncStorage.getItem('userEmail'); // Get user email from AsyncStorage
+
+    if (userEmail) {
+      try {
+        await setDoc(doc(db, 'users', userEmail), { language: lang }, { merge: true });
+        Alert.alert("Success", "Language preference updated!");
+      } catch (error) {
+        console.error("Error updating language: ", error);
+        Alert.alert("Error", "Failed to update language preference.");
+      }
+    }
   };
 
   const handleFeedback = () => {
@@ -91,12 +110,7 @@ const Settings = () => {
 
       {/* Language Selection */}
       <View style={styles.settingItem}>
-        <View style={{
-          flexDirection:"row",
-        }}>
-          <Fontisto name="world-o" size={26} color="black" />
-          <Text style={styles.settingText}>App Language</Text>
-        </View>
+        <Text style={styles.settingText}>App Language</Text>
         <Picker
           selectedValue={selectedLanguage}
           style={styles.picker}
@@ -105,6 +119,15 @@ const Settings = () => {
           <Picker.Item label="English" value="en" />
           <Picker.Item label="Spanish" value="es" />
           <Picker.Item label="French" value="fr" />
+          <Picker.Item label="Arabic" value="ar" />
+          <Picker.Item label="Chinese" value="zh" />
+          <Picker.Item label="Bengali" value="bn" />
+          <Picker.Item label="Korean" value="ko" />
+          <Picker.Item label="Russain" value="ru" />
+          <Picker.Item label="Hindi" value="hi" />
+          <Picker.Item label="Gujrati" value="gu" />
+          <Picker.Item label="Tamil" value="ta" />
+          <Picker.Item label="Turkish" value="tr"/>
         </Picker>
       </View>
 
@@ -171,6 +194,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
+  
 });
 
 export default Settings;

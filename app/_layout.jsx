@@ -1,15 +1,12 @@
 
-import { Stack, useNavigation} from "expo-router";
-import React, { useEffect, useState } from 'react';
+import { Stack} from "expo-router";
+import React from 'react';
 import  Header  from "../components/header"
-import { View, Text, Image, SafeAreaView } from 'react-native'
 import { ChatProvider } from './ChatContext';
+import { Image} from 'react-native';
+import MsgHeader from "../components/msgHeader"
 
 export default function RootLayout() {
-  const navigation=useNavigation();
-  /*React.useEffect(()=>{
-    navigation.navigate("auth/userprofile");
-  },[]);*/
   return (
     <ChatProvider>
     <Stack>
@@ -37,6 +34,15 @@ export default function RootLayout() {
           backgroundColor:"#e6f7fa"
         }
       }}/>
+      <Stack.Screen name="screens/chatpage"
+        options={({ route }) => ({
+          header: () => (
+            <MsgHeader 
+              userName={route.params.details.user} // Pass the user's name
+              profileImage={route.params.details.profileImage} // Pass the profile image
+            />
+          )
+        })}/>
     </Stack>
     </ChatProvider>
   );

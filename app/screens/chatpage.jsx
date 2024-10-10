@@ -1,9 +1,11 @@
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
 import { collection, query, where, onSnapshot, addDoc } from 'firebase/firestore';
 import { db } from '../config';
 import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const ChatPage = () => {
   const route = useRoute();
@@ -11,41 +13,73 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
-  const [currentUserEmail, setCurrentUserEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState(null);
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     const fetchCurrentUserEmail = async () => {
-      const email = await AsyncStorage.getItem('userEmail');
-      setCurrentUserEmail(email);
+      try {
+        const email = await AsyncStorage.getItem('userEmail');
+        setCurrentUserEmail(email);
+      } catch (error) {
+        console.error('Error fetching user email:', error);
+      }
     };
 
     fetchCurrentUserEmail();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'chats'), where('chatId', '==', chatId)),
-      (querySnapshot) => {
-        const messagesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Sort messages by timestamp in ascending order
-        messagesList.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
-        setMessages(messagesList);
-        setLoading(false);
-      }
-    );
+    if (currentUserEmail) {
+      const unsubscribe = onSnapshot(
+        query(collection(db, 'chats'), where('chatId', '==', chatId)),
+        async (querySnapshot) => {
+          const messagesList = await Promise.all(
+            querySnapshot.docs.map(async (doc) => {
+              const data = doc.data();
+              if (data.sender !== currentUserEmail) {
+                const translatedText = await translateMessage(data.text, 'en');
+                return { id: doc.id, ...data, text: translatedText };
+              }
+              return { id: doc.id, ...data };
+            })
+          );
 
-    return () => unsubscribe();
-  }, [chatId]);
+          messagesList.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+          setMessages(messagesList);
+          setLoading(false);
+        }
+      );
+
+      return () => unsubscribe();
+    }
+  }, [chatId, currentUserEmail]);
+
+  const translateMessage = async (message, targetLang) => {
+    try {
+      const response = await axios.post('http://192.168.31.232:5000/trans', {
+        targetlan: targetLang,
+        msg: message,
+      });
+      return response.data.translated;
+    } catch (error) {
+      console.error('Error translating message:', error.response?.data || error.message);
+      return message; // Return the original message if translation fails
+    }
+  };
 
   const sendMessage = async () => {
     if (message.trim()) {
+      setSending(true);
       await addDoc(collection(db, 'chats'), {
         chatId,
         text: message,
         sender: currentUserEmail,
-        timestamp: new Date(), // Ensure the timestamp is captured
+        timestamp: new Date(),
       });
       setMessage('');
+      setSending(false);
     }
   };
 
@@ -58,19 +92,18 @@ const ChatPage = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
       <FlatList
+        ref={flatListRef}
         data={messages}
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.messageContainer,
-              item.sender === currentUserEmail ? styles.myMessage : styles.otherMessage
-            ]}
-          >
+          <View style={[
+            styles.messageContainer,
+            item.sender === currentUserEmail ? styles.myMessage : styles.otherMessage
+          ]}>
             {item.sender !== currentUserEmail && (
               <Image
-                source={{ uri: details.profileImage }} // Profile image of the sender
+                source={{ uri: details.profileImage || 'path/to/default/image.png' }}
                 style={styles.profileImage}
               />
             )}
@@ -78,6 +111,9 @@ const ChatPage = () => {
           </View>
         )}
         keyExtractor={(item) => item.id}
+        onContentSizeChange={() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -87,18 +123,18 @@ const ChatPage = () => {
           placeholder="Type a message"
           placeholderTextColor="#999"
         />
-        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <Image source={require('../../assets/images/send.jpg')} style={styles.sendIcon} />
+        <TouchableOpacity onPress={sendMessage} style={styles.sendButton} disabled={sending || !message.trim()}>
+          <FontAwesome name="send" size={26} color="white"/>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#e6f7fa',
   },
   loaderContainer: {
     flex: 1,
@@ -108,7 +144,7 @@ const styles = StyleSheet.create({
   messageContainer: {
     flexDirection: 'row',
     marginBottom: 10,
-    maxWidth: '70%',
+    maxWidth: '100%',
     borderRadius: 15,
     padding: 10,
     marginHorizontal: 10,
@@ -120,14 +156,15 @@ const styles = StyleSheet.create({
   },
   myMessage: {
     backgroundColor: '#dcf8c6',
-    alignSelf: 'flex-end', // Align my messages to the right
+    alignSelf: 'flex-end',
   },
   otherMessage: {
     backgroundColor: '#f1f0f0',
-    alignSelf: 'flex-start', // Align other messages to the left
+    alignSelf: 'flex-start',
   },
   messageText: {
     color: '#000',
+    flexWrap: 'wrap',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -135,7 +172,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
-    backgroundColor: '#fff',
+    backgroundColor: '#2f3030',
   },
   input: {
     flex: 1,
@@ -148,10 +185,6 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     padding: 5,
-  },
-  sendIcon: {
-    width: 25,
-    height: 25,
   },
   profileImage: {
     width: 30,

@@ -72,6 +72,7 @@ const OtpScreen = () => {
           password,
           profileImage: imageUrl,
           bio,
+          language:"en",
         });
         Alert.alert("successfully register");
         router.navigate("auth/login");

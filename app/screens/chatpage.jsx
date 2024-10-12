@@ -15,6 +15,7 @@ const ChatPage = () => {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState(null);
+  const [userLanguage, setUserLanguage] = useState('en'); // Default language
   const flatListRef = useRef(null);
 
   useEffect(() => {
@@ -27,7 +28,17 @@ const ChatPage = () => {
       }
     };
 
+    const fetchUserLanguage = async () => {
+      try {
+        const lang = await AsyncStorage.getItem('language') || 'en'; // Default to English if not set
+        setUserLanguage(lang);
+      } catch (error) {
+        console.error('Error fetching user language:', error);
+      }
+    };
+
     fetchCurrentUserEmail();
+    fetchUserLanguage();
   }, []);
 
   useEffect(() => {
@@ -39,7 +50,7 @@ const ChatPage = () => {
             querySnapshot.docs.map(async (doc) => {
               const data = doc.data();
               if (data.sender !== currentUserEmail) {
-                const translatedText = await translateMessage(data.text, 'en');
+                const translatedText = await translateMessage(data.text, userLanguage); // Use user's preferred language
                 return { id: doc.id, ...data, text: translatedText };
               }
               return { id: doc.id, ...data };
@@ -54,11 +65,11 @@ const ChatPage = () => {
 
       return () => unsubscribe();
     }
-  }, [chatId, currentUserEmail]);
+  }, [chatId, currentUserEmail, userLanguage]);
 
   const translateMessage = async (message, targetLang) => {
     try {
-      const response = await axios.post('http://192.168.31.232:5000/trans', {
+      const response = await axios.post('http://192.168.61.3:5000/trans', {
         targetlan: targetLang,
         msg: message,
       });
@@ -81,6 +92,10 @@ const ChatPage = () => {
       setMessage('');
       setSending(false);
     }
+  };
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   if (loading) {
@@ -107,7 +122,10 @@ const ChatPage = () => {
                 style={styles.profileImage}
               />
             )}
-            <Text style={styles.messageText}>{item.text}</Text>
+            <View style={styles.messageContent}>
+              <Text style={styles.messageText}>{item.text}</Text>
+              <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
+            </View>
           </View>
         )}
         keyExtractor={(item) => item.id}
@@ -191,6 +209,15 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     marginRight: 10,
+  },
+  messageContent: {
+    flexDirection: 'column',
+  },
+  timestamp: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 3,
+    alignSelf: 'flex-end',
   },
 });
 

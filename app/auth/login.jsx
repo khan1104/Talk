@@ -113,7 +113,7 @@ const login = () => {
           }}>
             <Text style={{
               color: "blue",
-            }}>Forgot Password</Text>
+            }} onPress={()=>navigation.navigate("auth/forgotpass")}>Forgot Password</Text>
           </Pressable>
           <Pressable style={style.loginbtn} onPress={loginNext}>
           {loading ? (

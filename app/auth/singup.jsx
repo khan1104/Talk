@@ -110,7 +110,7 @@ const singup = () => {
               <Text style={{
                 color: "red",
                 fontSize: 13
-              }}>Enter a proper email number</Text>
+              }}>Enter a proper email ID</Text>
             </View>
           )}
           <View style={style.phone}>

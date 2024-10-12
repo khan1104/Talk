@@ -1,12 +1,17 @@
 
 import { Stack} from "expo-router";
-import React from 'react';
+import React, { useEffect } from 'react';
 import  Header  from "../components/header"
 import { ChatProvider } from './ChatContext';
 import { Image} from 'react-native';
-import MsgHeader from "../components/msgHeader"
+import MsgHeader from "../components/msgHeader";
+import { useNavigation } from "expo-router";
 
 export default function RootLayout() {
+  const navigation=useNavigation()
+  // useEffect(()=>{
+  //   navigation.navigate("auth/changepass");
+  // })
   return (
     <ChatProvider>
     <Stack>
@@ -20,6 +25,12 @@ export default function RootLayout() {
         headerShown:false,
       }}/>
       <Stack.Screen name="auth/otp" options={{
+        headerShown:false,
+      }}/>
+      <Stack.Screen name="auth/forgotpass" options={{
+        headerShown:false,
+      }}/>
+      <Stack.Screen name="auth/changepass" options={{
         headerShown:false,
       }}/>
       <Stack.Screen name="(tabs)" options={{

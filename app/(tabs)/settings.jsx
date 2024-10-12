@@ -1,13 +1,11 @@
-import { View, Text, StyleSheet, Pressable, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Fontisto from '@expo/vector-icons/Fontisto';
-import { db } from '../config'; // Adjust the import path as necessary
-import { doc, deleteDoc,getDoc,setDoc } from 'firebase/firestore';
-
+import {db} from "../config"
+import { deleteDoc, doc } from 'firebase/firestore'; // Import deleteDoc and doc
 
 const Settings = () => {
   const router = useRouter();
@@ -15,18 +13,11 @@ const Settings = () => {
 
   useEffect(() => {
     const loadLanguage = async () => {
-      const userEmail = await AsyncStorage.getItem('userEmail'); // Assuming you have userEmail stored
-      if (userEmail) {
-        const docRef = doc(db, 'users', userEmail);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setSelectedLanguage(docSnap.data().language);
-          console.log("languae");
-          console.log(selectedLanguage)
-        }
-        else{
-          console.log("not found");
-        }
+      const lang = await AsyncStorage.getItem('language'); // Get language from AsyncStorage
+      if (lang) {
+        setSelectedLanguage(lang);
+      } else {
+        setSelectedLanguage('en'); // Default language
       }
     };
     loadLanguage();
@@ -34,16 +25,12 @@ const Settings = () => {
 
   const handleLanguageChange = async (lang) => {
     setSelectedLanguage(lang);
-    const userEmail = await AsyncStorage.getItem('userEmail'); // Get user email from AsyncStorage
-
-    if (userEmail) {
-      try {
-        await setDoc(doc(db, 'users', userEmail), { language: lang }, { merge: true });
-        Alert.alert("Success", "Language preference updated!");
-      } catch (error) {
-        console.error("Error updating language: ", error);
-        Alert.alert("Error", "Failed to update language preference.");
-      }
+    try {
+      await AsyncStorage.setItem('language', lang); // Store selected language in AsyncStorage
+      Alert.alert("Success", "Language preference updated!");
+    } catch (error) {
+      console.error("Error updating language: ", error);
+      Alert.alert("Error", "Failed to update language preference.");
     }
   };
 
@@ -69,7 +56,6 @@ const Settings = () => {
         },
       ]
     );
-
   };
 
   const handleDeleteAccount = async () => {
@@ -81,9 +67,8 @@ const Settings = () => {
         {
           text: "Delete", onPress: async () => {
               try {
-                const email=await AsyncStorage.getItem("userEmail");
-                console.log(email)
-                await deleteDoc(doc(db, 'users',email));
+                const email = await AsyncStorage.getItem("userEmail");
+                await deleteDoc(doc(db, 'users', email)); // Assuming you still want to delete from Firebase
                 Alert.alert('Success', 'Account deleted Successfully');
                 await AsyncStorage.clear(); // Clear user data
                 router.replace("auth/login");
@@ -100,12 +85,7 @@ const Settings = () => {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={{
-          color: "black",
-          fontSize: 30,
-          fontWeight: "bold",
-          textAlign: "center",
-        }}>Settings</Text>
+        <Text style={styles.title}>Settings</Text>
       </View>
 
       {/* Language Selection */}
@@ -120,26 +100,25 @@ const Settings = () => {
           <Picker.Item label="Spanish" value="es" />
           <Picker.Item label="French" value="fr" />
           <Picker.Item label="Arabic" value="ar" />
-          <Picker.Item label="Chinese" value="zh" />
           <Picker.Item label="Bengali" value="bn" />
           <Picker.Item label="Korean" value="ko" />
-          <Picker.Item label="Russain" value="ru" />
+          <Picker.Item label="Russian" value="ru" />
           <Picker.Item label="Hindi" value="hi" />
-          <Picker.Item label="Gujrati" value="gu" />
+          <Picker.Item label="Gujarati" value="gu" />
           <Picker.Item label="Tamil" value="ta" />
-          <Picker.Item label="Turkish" value="tr"/>
+          <Picker.Item label="Turkish" value="tr" />
         </Picker>
       </View>
 
       {/* Account Settings */}
-      <Pressable style={[styles.settingItem,styles.extra]} onPress={handleAccountSettings}>
-      <MaterialIcons name="app-settings-alt" size={28} color="black" />
+      <Pressable style={[styles.settingItem, styles.extra]} onPress={handleAccountSettings}>
+        <MaterialIcons name="app-settings-alt" size={28} color="black" />
         <Text style={styles.settingText}>Account Settings</Text>
       </Pressable>
 
       {/* Feedback */}
-      <Pressable style={[styles.settingItem,styles.extra]} onPress={handleFeedback}>
-      <MaterialIcons name="feedback" size={27} color="black" />
+      <Pressable style={[styles.settingItem, styles.extra]} onPress={handleFeedback}>
+        <MaterialIcons name="feedback" size={27} color="black" />
         <Text style={styles.settingText}>Send Feedback</Text>
       </Pressable>
 
@@ -166,6 +145,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#e6f7fa',
+  },
+  title: {
+    color: "black",
+    fontSize: 30,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   settingItem: {
     paddingVertical: 15,
@@ -194,7 +179,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
-  
 });
 
 export default Settings;

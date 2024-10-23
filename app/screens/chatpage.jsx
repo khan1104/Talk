@@ -69,7 +69,7 @@ const ChatPage = () => {
 
   const translateMessage = async (message, targetLang) => {
     try {
-      const response = await axios.post('http://192.168.61.3:5000/trans', {
+      const response = await axios.post('http://192.168.84.3:5000/trans', {
         targetlan: targetLang,
         msg: message,
       });
@@ -116,12 +116,7 @@ const ChatPage = () => {
             styles.messageContainer,
             item.sender === currentUserEmail ? styles.myMessage : styles.otherMessage
           ]}>
-            {item.sender !== currentUserEmail && (
-              <Image
-                source={{ uri: details.profileImage || 'path/to/default/image.png' }}
-                style={styles.profileImage}
-              />
-            )}
+      
             <View style={styles.messageContent}>
               <Text style={styles.messageText}>{item.text}</Text>
               <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
@@ -162,7 +157,7 @@ const styles = StyleSheet.create({
   messageContainer: {
     flexDirection: 'row',
     marginBottom: 10,
-    maxWidth: '100%',
+    maxWidth: '80%',
     borderRadius: 15,
     padding: 10,
     marginHorizontal: 10,
@@ -171,6 +166,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+    marginTop:15,
   },
   myMessage: {
     backgroundColor: '#dcf8c6',
@@ -222,3 +218,4 @@ const styles = StyleSheet.create({
 });
 
 export default ChatPage;
+//real

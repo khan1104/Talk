@@ -1,12 +1,12 @@
-import { View, Text, FlatList, StyleSheet, Pressable, Image, ActivityIndicator, RefreshControl } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, Pressable, Image, ActivityIndicator, RefreshControl, Button } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from 'expo-router';
 
 const Chats = () => {
-  const navigation=useNavigation();
+  const navigation = useNavigation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,17 +36,22 @@ const Chats = () => {
     }
   };
 
-  const onRefresh = () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    getAllUsers().then(() => setRefreshing(false)); // Refresh the users list
+    getAllUsers().then(() => setRefreshing(false));
+  }, []);
+
+  const handlePress = (item) => {
+    const chatId = [currentUserEmail, item.mail].sort().join('_');
+    navigation.navigate("screens/chatpage", { details: item, chatId });
   };
-  const RenderCard = ({ item }) => (
+
+  const RenderCard = React.memo(({ item }) => (
     <Pressable
       style={styles.userItem}
-      onPress={() => {
-        const chatId = [currentUserEmail, item.mail].sort().join('_'); // Create a unique chat ID
-        navigation.navigate("screens/chatpage", { details: item, chatId });
-      }}
+      onPress={() => handlePress(item)}
+      accessibilityLabel={`Chat with ${item.user}`}
+      accessibilityRole="button"
     >
       {item.profileImage ? (
         <Image source={{ uri: item.profileImage }} style={styles.profileImage} />
@@ -58,7 +63,7 @@ const Chats = () => {
         <Text style={styles.userEmail}>{item.mail}</Text>
       </View>
     </Pressable>
-  );
+  ));
 
   useEffect(() => {
     getAllUsers();
@@ -73,7 +78,12 @@ const Chats = () => {
   }
 
   if (error) {
-    return <Text style={styles.errorText}>{error}</Text>;
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Button title="Retry" onPress={getAllUsers} />
+      </View>
+    );
   }
 
   if (users.length === 0) {
@@ -86,6 +96,7 @@ const Chats = () => {
         data={users}
         renderItem={({ item }) => <RenderCard item={item} />}
         keyExtractor={(item) => item.mail}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -119,8 +130,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   profileImage: {
-    width: 55,
-    height: 55,
+    width: 59,
+    height: 59,
     borderRadius: 30,
     marginRight: 15,
     borderWidth: 1,
@@ -146,6 +157,11 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorText: {
     textAlign: 'center',

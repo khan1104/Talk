@@ -145,6 +145,14 @@ const singup = () => {
               }}>Password must be at least 7 characters long and include both uppercase and lowercase letters</Text>
             </View>
           )}
+          <Pressable style={style.btn} onPress={singupNext}>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: "bold",
+              color: "white",
+              letterSpacing: 1
+            }}>signup</Text>
+          </Pressable>
           <Pressable style={style.btn} onPress={login}>
             <Text style={{
               fontSize: 20,
@@ -152,14 +160,6 @@ const singup = () => {
               color: "white",
               letterSpacing: 1
             }}>Login</Text>
-          </Pressable>
-          <Pressable style={style.btn} onPress={singupNext}>
-            <Text style={{
-              fontSize: 20,
-              fontWeight: "bold",
-              color: "white",
-              letterSpacing: 1
-            }}>Sign up</Text>
           </Pressable>
         </View>
       </SafeAreaView></ScrollView>

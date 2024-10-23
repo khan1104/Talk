@@ -52,7 +52,7 @@ const Forgotpass = () => {
 
     const sendDataToBackend = async () => {
         try {
-            const response = await axios.post('http://192.168.61.3:5000/send-otp', { mail });
+            const response = await axios.post('http://192.168.84.3:5000/send-otp', { mail });
             console.log('Response from backend:', response.data);
             setBackendOtp(response.data.message);
         } catch (error) {

@@ -4,6 +4,7 @@ import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     // Apne Firebase config yahan dalen
+    //add your firebase credentials here
   
 };
 

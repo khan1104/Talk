@@ -15,7 +15,7 @@ const ChatPage = () => {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState(null);
-  const [userLanguage, setUserLanguage] = useState('en'); // Default language
+  const [userLanguage, setUserLanguage] = useState('en'); 
   const flatListRef = useRef(null);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const ChatPage = () => {
 
     const fetchUserLanguage = async () => {
       try {
-        const lang = await AsyncStorage.getItem('language') || 'en'; // Default to English if not set
+        const lang = await AsyncStorage.getItem('language') || 'en'; 
         setUserLanguage(lang);
       } catch (error) {
         console.error('Error fetching user language:', error);
@@ -50,7 +50,7 @@ const ChatPage = () => {
             querySnapshot.docs.map(async (doc) => {
               const data = doc.data();
               if (data.sender !== currentUserEmail) {
-                const translatedText = await translateMessage(data.text, userLanguage); // Use user's preferred language
+                const translatedText = await translateMessage(data.text, userLanguage); 
                 return { id: doc.id, ...data, text: translatedText };
               }
               return { id: doc.id, ...data };
@@ -69,27 +69,41 @@ const ChatPage = () => {
 
   const translateMessage = async (message, targetLang) => {
     try {
-      const response = await axios.post('http://192.168.84.3:5000/trans', {
+      const response = await axios.post('http://192.168.31.232:5000/trans', {
         targetlan: targetLang,
         msg: message,
       });
       return response.data.translated;
     } catch (error) {
       console.error('Error translating message:', error.response?.data || error.message);
-      return message; // Return the original message if translation fails
+      return message; 
     }
   };
 
   const sendMessage = async () => {
     if (message.trim()) {
       setSending(true);
-      await addDoc(collection(db, 'chats'), {
-        chatId,
-        text: message,
-        sender: currentUserEmail,
-        timestamp: new Date(),
-      });
-      setMessage('');
+  
+      try {
+        const response = await axios.post("http://172.16.213.218:5000/censor", {
+          message: message,
+        });
+  
+        const censoredMessage = response.data.censored; 
+  
+     
+        await addDoc(collection(db, "chats"), {
+          chatId,
+          text: censoredMessage, 
+          sender: currentUserEmail,
+          timestamp: new Date(),
+        });
+  
+        setMessage("");
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+  
       setSending(false);
     }
   };
@@ -183,7 +197,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding:15,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
     backgroundColor: '#2f3030',
@@ -218,4 +232,3 @@ const styles = StyleSheet.create({
 });
 
 export default ChatPage;
-//real
